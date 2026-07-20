@@ -7,7 +7,7 @@
     <style>
         :root {
             --primary-color: #ff6b6b;
-            --bg-color: #1a3db3; /* 采用爱心文件的深色浪漫背景，更显发光效果 */
+            --bg-color: #1a3db3;
             --text-color: #e9ecf1;
             --card-bg: rgba(255, 255, 255, 0.05);
         }
@@ -83,7 +83,7 @@
             transform-origin: 50% 50%;
         }
 
-        /* === 隐藏的控制面板（点击右上角设置展开） === */
+       
         .settings-menu {
             position: fixed;
             top: 20px; right: 20px;
@@ -117,7 +117,7 @@
 
         /* === 时光轴生命线区域 === */
         .timeline {
-            max-width: 850px;
+            max-width: 1000px;
             margin: 30px auto 60px;
             position: relative;
             padding: 20px;
@@ -154,7 +154,7 @@
         .right::after { left: -11px; }
 
         .content {
-            padding: 25px;
+            padding: 20px 15px;
             background: var(--card-bg);
             border: 1px solid rgba(255,255,255,0.05);
             border-radius: 16px;
@@ -208,7 +208,7 @@
 </div>
 
 <header>
-    <div class="main-title">🧡 春宝和幻宝的时光屋</div>
+    <div class="main-title">🧡 春宝和幻宝的时光屋 🧡</div>
     <div class="anniversary">起点：2026年1月1日</div>
     <div id="bigCounter" class="big-counter"></div>
 </header>
@@ -227,7 +227,7 @@
 <div class="timeline" id="timeline"></div>
 
 <footer>
-    提示：点击右上角设置可以调节爱心波形。长厢伴守，岁岁年年。
+    提示：点击右上角设置可以调节爱心波形哦
 </footer>
 
 <script>
@@ -240,7 +240,7 @@
         return Math.floor(diff / (1000 * 60 * 60 * 24)) ;
     }
     const today = new Date();
-    document.getElementById('bigCounter').innerText = `今天是我们在一起的第 ${getDaysCount(today)} 天`;
+    document.getElementById('bigCounter').innerText = `今天是我们同舟共济的第 ${getDaysCount(today)} 天`;
 
     // === 2. 爱心 Canvas 渲染核心算法 ===
     const canvas = document.getElementById("c");
