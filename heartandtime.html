@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我们的时光屋</title>
+    <style>
+        :root {
+            --primary-color: #ff6b6b;
+            --bg-color: #1a3db3; /* 采用爱心文件的深色浪漫背景，更显发光效果 */
+            --text-color: #e9ecf1;
+            --card-bg: rgba(255, 255, 255, 0.05);
+        }
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        
+        /* 顶部标题区 */
+        header {
+            text-align: center;
+            padding: 40px 20px 10px;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            position: relative;
+        }
+        .main-title { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 10px; font-weight: bold; }
+        .anniversary { font-size: 1.1rem; color: #a0aab5; letter-spacing: 1px; }
+        .big-counter {
+            font-size: 1.6rem;
+            margin-top: 15px;
+            font-weight: bold;
+            color: #ff4f9a;
+            text-shadow: 0 0 10px rgba(255,79,154,0.3);
+        }
+
+        /* === 爱心演示区域 === */
+        .heart-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 10px;
+            gap: 15px;
+            background: radial-gradient(circle at center, rgba(255,80,140,0.05), transparent 70%);
+        }
+        canvas {
+            width: min(92vw, 700px);
+            height: min(50vh, 400px);
+            border-radius: 18px;
+            background: rgba(255,255,255,0.01);
+            border: 1px solid rgba(255,255,255,0.06);
+            box-shadow: 0 15px 40px rgba(0,0,0,.5);
+            will-change: transform;
+        }
+        /* 诗句区域 */
+        .poem {
+            width: min(92vw, 700px);
+            text-align: center;
+            line-height: 2;
+            font-size: 16px;
+            letter-spacing: 1px;
+            user-select: none;
+            opacity: 0.95;
+            text-shadow: 0 0 15px rgba(0,0,0,0.5);
+            will-change: transform;
+            margin-bottom: 20px;
+            transition: color 0.5s ease;
+        }
+        .poem-line { padding: 2px 0; }
+
+        /* 跳动动画 */
+        @keyframes pulse {
+            0%   { transform: scale(1); }
+            35%  { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+        .pulse {
+            animation: pulse 260ms ease-out;
+            transform-origin: 50% 50%;
+        }
+
+        /* === 隐藏的控制面板（点击右上角设置展开） === */
+        .settings-menu {
+            position: fixed;
+            top: 20px; right: 20px;
+            z-index: 100;
+        }
+        .settings-toggle {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white; width: 40px; height: 40px; border-radius: 50%;
+            cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center;
+        }
+        .controls {
+            position: absolute; top: 50px; right: 0;
+            background: rgba(11, 15, 26, 0.95);
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 15px; border-radius: 12px;
+            display: none; flex-direction: column; gap: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            width: 260px;
+        }
+        .controls.show { display: flex; }
+        .btn-group { display: flex; gap: 10px; }
+        .btn {
+            flex: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+            color: #fff; padding: 6px; border-radius: 6px; cursor: pointer; font-size: 13px;
+        }
+        .btn:hover { background: rgba(255,255,255,0.2); }
+        .panel-label { font-size: 11px; display: flex; justify-content: space-between; align-items: center; color: #ccc; }
+        .panel-label input { width: 120px; }
+        input[type="color"] { width: 30px; height: 20px; border: none; background: transparent; padding:0;}
+
+        /* === 时光轴生命线区域 === */
+        .timeline {
+            max-width: 850px;
+            margin: 30px auto 60px;
+            position: relative;
+            padding: 20px;
+        }
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 2px;
+            background: linear-gradient(to bottom, #ff4f9a, var(--primary-color));
+            top: 0; bottom: 0; left: 50%;
+            margin-left: -1px;
+        }
+
+        /* 记忆卡片 */
+        .memory-card {
+            padding: 10px 50px;
+            position: relative;
+            width: 50%;
+            box-sizing: border-box;
+        }
+        .memory-card::after {
+            content: '❤';
+            position: absolute;
+            width: 22px; height: 22px;
+            right: -11px; top: 20px;
+            background: #0b0f1a;
+            border: 2px solid var(--primary-color);
+            border-radius: 50%;
+            z-index: 1;
+            text-align: center; font-size: 11px; line-height: 22px; color: var(--primary-color);
+        }
+        .left { left: 0; text-align: right; }
+        .right { left: 50%; text-align: left; }
+        .right::after { left: -11px; }
+
+        .content {
+            padding: 25px;
+            background: var(--card-bg);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transition: transform 0.3s, border-color 0.3s;
+        }
+        .content:hover { 
+            transform: translateY(-4px); 
+            border-color: rgba(255, 107, 107, 0.3);
+        }
+        .content h3 { margin: 0 0 12px; color: var(--primary-color); font-size: 1.1rem; font-weight: 600; }
+        .content p { font-size: 0.95rem; line-height: 1.7; margin: 10px 0; white-space: pre-line; color: #d1d9e0; }
+        .content img, .content video {
+            width: 100%;
+            border-radius: 12px;
+            margin-top: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        footer {
+            padding: 25px; font-size: 12px; opacity: .5; text-align: center; letter-spacing: 0.5px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        @media screen and (max-width: 700px) {
+            .timeline::after { left: 31px; }
+            .memory-card { width: 100%; padding-left: 65px; padding-right: 20px; text-align: left; }
+            .memory-card::after { left: 20px; }
+            .right { left: 0%; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 右上角隐藏的高级控制悬浮窗 -->
+<div class="settings-menu">
+    <button class="settings-toggle" onclick="document.getElementById('controlsPanel').classList.toggle('show')">⚙</button>
+    <div class="controls" id="controlsPanel">
+        <div class="btn-group">
+            <button id="toggle" class="btn">暂停心跳</button>
+            <button id="reset" class="btn">重置参数</button>
+        </div>
+        <hr style="border:0;border-top:1px solid rgba(255,255,255,0.1);margin:5px 0;">
+        <label class="panel-label">速度 <input id="speed" type="range" min="0.005" max="0.25" step="0.005" value="0.05"></label>
+        <label class="panel-label">振幅 <input id="amp" type="range" min="0" max="1.4" step="0.01" value="0.90"></label>
+        <label class="panel-label">密度 <input id="xStep" type="range" min="0.003" max="0.03" step="0.001" value="0.01"></label>
+        <label class="panel-label">点大小 <input id="dot" type="range" min="1" max="6" step="0.2" value="2.2"></label>
+        <label class="panel-label">发光 <input id="glow" type="range" min="0" max="30" step="1" value="12"></label>
+        <label class="panel-label">主色调 <input id="color" type="color" value="#ff4f9a"></label>
+    </div>
+</div>
+
+<header>
+    <div class="main-title">🧡 春宝和幻宝的时光屋</div>
+    <div class="anniversary">起点：2026年1月1日</div>
+    <div id="bigCounter" class="big-counter"></div>
+</header>
+
+<!-- 前置组合的爱心区域 -->
+<div class="heart-container">
+    <canvas id="c"></canvas>
+    <div id="poem" class="poem">
+        <div class="poem-line">我经常好奇，你是谁</div>
+        <div class="poem-line">那天，你的心跳与我的脉搏共振</div>
+        <div class="poem-line">原来你就是我</div>
+    </div>
+</div>
+
+<!-- 下方时间轴回忆墙 -->
+<div class="timeline" id="timeline"></div>
+
+<footer>
+    提示：点击右上角设置可以调节爱心波形。长厢伴守，岁岁年年。
+</footer>
+
+<script>
+(() => {
+    // === 1. 恋爱天数统计逻辑 ===
+    const startDate = new Date("2026-01-01");
+    function getDaysCount(currentDateStr) {
+        const current = new Date(currentDateStr);
+        const diff = current - startDate;
+        return Math.floor(diff / (1000 * 60 * 60 * 24)) ;
+    }
+    const today = new Date();
+    document.getElementById('bigCounter').innerText = `今天是我们在一起的第 ${getDaysCount(today)} 天`;
+
+    // === 2. 爱心 Canvas 渲染核心算法 ===
+    const canvas = document.getElementById("c");
+    const ctx = canvas.getContext("2d");
+
+    function resize() {
+        const dpr = Math.max(1, Math.min(2.5, window.devicePixelRatio || 1));
+        const rect = canvas.getBoundingClientRect();
+        canvas.width  = Math.floor(rect.width * dpr);
+        canvas.height = Math.floor(rect.height * dpr);
+        ctx.setTransform(dpr,0,0,dpr,0,0);
+    }
+    window.addEventListener("resize", resize);
+    resize();
+
+    // 控制面板元素绑定
+    const el = (id) => document.getElementById(id);
+    const speed = el("speed"), amp = el("amp"), xStep = el("xStep"), dot = el("dot"), color = el("color"), glow = el("glow");
+    const poemEl = el("poem");
+
+    // 预设自动循环变换的彩虹色盘
+    const palette = ["#ff4f9a", "#ff3b3b", "#ffb703", "#7c4dff", "#35c2ff", "#31e981"];
+    let paletteIndex = 0;
+
+    function applyColor(hex){
+        color.value = hex;
+        poemEl.style.color = hex;
+    }
+
+    function pulseOnce(){
+        canvas.classList.remove("pulse");
+        poemEl.classList.remove("pulse");
+        void canvas.offsetWidth; // 触发重绘
+        canvas.classList.add("pulse");
+        poemEl.classList.add("pulse");
+        setTimeout(() => {
+            canvas.classList.remove("pulse");
+            poemEl.classList.remove("pulse");
+        }, 300);
+    }
+
+    // 定时换色与频率跳动
+    applyColor(palette[paletteIndex]);
+    setInterval(() => {
+        paletteIndex = (paletteIndex + 1) % palette.length;
+        applyColor(palette[paletteIndex]);
+        pulseOnce();
+    }, 2000);
+
+    color.addEventListener("input", () => {
+        poemEl.style.color = color.value;
+        pulseOnce();
+    });
+
+    // 数学心脏方程公式
+    const X_MIN = -1.81, X_MAX = 1.81, SQRT_A = 3.3;
+    let k = 0, running = true;
+
+    function heartY(x, kVal, ampVal){
+        const x2 = x*x;
+        const base = Math.pow(x2, 1/3);
+        const inside = SQRT_A - x2;
+        const wave = inside > 0 ? Math.sqrt(inside) : 0;
+        return base + ampVal * wave * Math.sin(kVal * Math.PI * x);
+    }
+
+    function render(){
+        const w = canvas.getBoundingClientRect().width;
+        const h = canvas.getBoundingClientRect().height;
+        ctx.clearRect(0,0,w,h);
+
+        const step = Number(xStep.value), ampV = Number(amp.value), dotSize = Number(dot.value);
+        let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
+        const pts = [];
+
+        for(let x=X_MIN; x<=X_MAX+1e-9; x+=step){
+            const y = heartY(x, k, ampV);
+            pts.push([x,y]);
+            if(x<minX) minX=x; if(x>maxX) maxX=x;
+            if(y<minY) minY=y; if(y>maxY) maxY=y;
+        }
+
+        const pad = 0.12;
+        const dx = (maxX - minX) || 1; const dy = (maxY - minY) || 1;
+        minX -= dx*pad; maxX += dx*pad; minY -= dy*pad; maxY += dy*pad;
+
+        const mapX = (x)=> (x - minX) / (maxX - minX) * w;
+        const mapY = (y)=> h - (y - minY) / (maxY - minY) * h;
+
+        ctx.save();
+        ctx.fillStyle = color.value;
+        ctx.shadowColor = color.value;
+        ctx.shadowBlur = Number(glow.value);
+
+        for(const [x,y] of pts){
+            ctx.beginPath();
+            ctx.arc(mapX(x), mapY(y), dotSize, 0, Math.PI*2);
+            ctx.fill();
+        }
+        ctx.restore();
+    }
+
+    function tick(){
+        if(running) k += Number(speed.value);
+        render();
+        requestAnimationFrame(tick);
+    }
+    tick();
+
+    // 暂停/重置动作分配
+    const toggleBtn = el("toggle");
+    toggleBtn.addEventListener("click", ()=> {
+        running = !running;
+        toggleBtn.textContent = running ? "暂停心跳" : "开启心跳";
+    });
+    el("reset").addEventListener("click", ()=> { k = 0; render(); });
+
+    // === 3. 时光轴数据更新和动态渲染 ===
+    const memories = [
+        {
+            date: "2026-01-01",
+            title: "我们正式在一起啦",
+            thought: "跨年的烟火下\n伫立公交站台\n他鼓起勇气\n说出了冬天的秘密\n\n地球又绕了太阳一圈\n我们再次相见\n多年以后\n还会想起那个在嘉里中心无话不说的下午\n\n那天晚上，第一次感受到你指尖的温暖\n从此放不下你的手\n此后，世界人民在庆祝新年的到来时\n溢出的喜悦也可以用来庆祝我们的纪念日",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260101.jpg?raw=true" 
+        },
+        {
+            date: "2026-01-25",
+            title: "我的生日",
+            thought: "在童年小筑\n我和你把蛋糕挖出隧道\n联通了我们的精神世界",
+            type: "image",
+            url: "https://raw.githubusercontent.com/SW-19/ImageBed/refs/heads/main/20260125.jpg"
+        },
+        {
+            date: "2026-01-31",
+            title: "一起逛宜家",
+            thought: "那天我们一起逛了宜家\n躺平在沙发上，腻歪在玩偶里面\n看遍各式家具\n其中有些家具可能也会出现在我们家中\n在那前几天，我心情不太好\n因为幻宝错了伤人的话\n可是因为你一直在找我\n找到了滨江，找到了解放路\n我突然就回心转意了\n希望以后不要再难过啦",
+            type: "image",
+            url: "https://raw.githubusercontent.com/SW-19/ImageBed/refs/heads/main/20260131.jpg"
+        },
+        {
+            date: "2026-02-04",
+            title: "苏面坊",
+            thought: "在蜻蜓公园的苏式面馆\n看着机医吃着面\n我说幻宝有点像硕亨\n有点呆呆的\n也很真诚耿直",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260204.jpg?raw=true"
+        },
+        {
+            date: "2026-02-12",
+            title: "我的生日",
+            thought: "腊月二十五\n第一次有人为我策划了生日\n布置了惊喜的场面\n那天在KTV\n幻宝唱着《特别的人》\n我不知道为什么就掉珍珠了",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260212.jpg?raw=true"
+        },  
+        {
+            date: "2026-02-14",
+            title: "Valentine's Day",
+            thought: "这是我们在一起的第一个西方情人节💘\n我为幻宝做了一个钩织画\n用了很多心思\n幻宝的满天星也溢出了好多爱",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260214.jpg?raw=true"
+        },   
+        {
+            date: "2026-03-01",
+            title: "调香",
+            thought: "两位初级调香师为自己搭配了手串和香水\n从此我们又多了一个羁绊",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260301.jpg?raw=true"
+        },  
+        {
+            date: "2026-03-07",
+            title: "看话剧",
+            thought: "我们一起看了话剧\n我还怂恿幻宝接受了一个采访",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260307.jpg?raw=true"
+        },  
+        {
+            date: "2026-03-08",
+            title: "赏郁金香",
+            thought: "幻宝说：太子湾的郁金香隽秀清美\n但略逊于我",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260308.jpg?raw=true"
+        },
+        {
+            date: "2026-03-15",
+            title: "湘香蒸菜馆",
+            thought: "那天下午幻宝带我逛了湘湖\n吃到了人气爆棚的蒸菜\n我更爱吃这个茄子",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260315.jpg?raw=true"
+        },
+        {
+            date: "2026-03-25",
+            title: "“为你，不辞万里”",
+            thought: "我一句“把你亲晕”\n你便到了华家池",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260325.jpg?raw=true"
+        },
+        {
+            date: "2026-03-29",
+            title: "马拉松",
+            thought: "陪幻宝一起去梦想小镇领取了马拉松物资\n春宝也算是参加过马拉松的人啦",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260329.jpg?raw=true"
+        },
+        {
+            date: "2026-04-10",
+            title: "春宝和幻宝的100天纪念蜜月旅行————第1天",
+            thought: "我数过，一百个日升月落\n我感受，一百圈地球自转\n我发送，一百句晚安\n我曾想，一百次见你\n我期待一百年后的回眸\n\n这个春天，载着花瓣飘走\n下个春天，会一季一季地回来\n而我，只想牵着你的手\n把每一个平凡的日子\n都走成\n值得回忆的遥远",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260410-3.jpg?raw=true"
+        }, 
+        {
+            date: "2026-04-10",
+            title: "春宝和幻宝的100天纪念蜜月旅行————第1天",
+            thought: "幻宝本想带我尝尝他爱吃的肥肠鸡\n结果翻车了\n他被辣闷了\n喝酒都没这么闷过",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260410-1.jpg?raw=true"
+        },
+        {
+            date: "2026-04-10",
+            title: "春宝和幻宝的100天纪念蜜月旅行————第1天",
+            thought: "来到了幻宝的本科之窟\n走过他走过的路",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260410-2.jpg?raw=true"
+        },        
+        {
+            date: "2026-04-11",
+            title: "春宝和幻宝的100天纪念蜜月旅行————第2天",
+            thought: "在美龄宫\n幻宝又给我拍到了一张好看的照片",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260411-2.jpg?raw=true"
+        },
+        {
+            date: "2026-04-11",
+            title: "春宝和幻宝的100天纪念蜜月旅行————第2天",
+            thought: "南京大排档真好吃呀\n吃得走不动路了",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260411-3.jpg?raw=true"
+        },
+        {
+            date: "2026-04-11",
+            title: "春宝和幻宝的100天纪念蜜月旅行————第2天",
+            thought: "回到了酒店\n我们一起吃掉了100天纪念日蛋糕\n然后睡大觉",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260411.jpg?raw=true"
+        }, 
+        {
+            date: "2026-04-12",
+            title: "春宝和幻宝的100天纪念蜜月旅行————第3天",
+            thought: "南京的天阴阴的\n正像我的心情一样\n因为幻宝惹我生气了",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260412.jpg?raw=true"
+        }, 
+        {
+            date: "2026-04-26",
+            title: "再探湘湖",
+            thought: "和幻宝拿捏了第一座小山\n又捕捉到美丽的瞬间\n以后还要和他继续跨越山海\n翻过障碍\n续写新的故事",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260426.jpg?raw=true"
+        },
+        {
+            date: "2026-04-30",
+            title: "夜访河坊街",
+            thought: "今天给幻宝展露了一手才艺\n他一定更加仰慕我了吧哈哈哈",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260430.jpg?raw=true"
+        },
+        {
+            date: "2026-05-01",
+            title: "私人影院",
+            thought: "这天在私人影院看了闪灵\n原来幻宝胆子这么小",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260501.jpg?raw=true"
+        },
+        {
+            date: "2026-05-02",
+            title: "微信视频",
+            thought: "五一的时候幻宝回家有事\n实在按捺不住想他的心\n决定晚上和他视频\n竟然被他偷偷截屏\n留下了这搞笑的一幕",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260502.jpg?raw=true"
+        },
+        {
+            date: "2026-05-05",
+            title: "杭钢公园",
+            thought: "幻宝今天说我的拍照技术突飞猛进，他也帮我拍到了我最喜欢的照片\n感觉杭钢没有北钢大",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260505.jpg?raw=true"
+        },
+        {
+            date: "2026-05-10",
+            title: "素勤",
+            thought: "今天和幻宝找到了一家深巷小吃\n美味又实惠\n给幻宝吃美了",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260510-4.jpg?raw=true"
+        },
+        {
+            date: "2026-05-10",
+            title: "白堤",
+            thought: "幻宝整天嚷嚷着要去走一下白堤\n似乎不走一遍总是有一点遗憾\n今天终于和他逛了一下\n他又给我拍照了\n他总是那么喜欢拍我\n那么喜欢记录我\n那么喜欢我",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260510.jpg?raw=true"
+        },
+        {
+            date: "2026-05-20",
+            title: "幻宝和春宝的第一个520",
+            thought: "你说这张照片是今日最佳\n可在我眼里所有照片都是绝佳\n因为有你的存在",
+            type: "image",
+            url: "https://raw.githubusercontent.com/SW-19/ImageBed/refs/heads/main/20260520.jpg"
+        },
+        {
+            date: "2026-05-20",
+            title: "幻宝和春宝的第一个520",
+            thought: "绍兴今天天气异常闷热，但我和幻宝耍得很happy",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260520-2.jpg?raw=true"
+        },
+        {
+            date: "2026-05-20",
+            title: "幻宝和春宝的第一个520",
+            thought: "520的这天我送了幻宝一瓶香水\n他一定乐开花了吧\n还有一个手写的卡片\n我一直都挺喜欢手写祝福的\n幻宝也经常给我写",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260520-3.jpg?raw=true"
+        },
+        {
+            date: "2026-05-30",
+            title: "无题",
+            thought: "不知道这又是幻宝在哪偷拍的",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260530.jpg?raw=true"
+        },
+        {
+            date: "2026-05-30",
+            title: "水上巴士",
+            thought: "幻宝带我坐上了水上巴士\n从南向北\n路过医院，流过东河\n在岸边寻找螃蟹\n别有一番趣味",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260530-2.jpg?raw=true"
+        },
+        {
+            date: "2026-06-19",
+            title: "灵山",
+            thought: "心甘情愿被景区收割了一波\n相框和照片还算精美\n很值得收藏",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260619.jpg?raw=true"
+        },
+        {
+            date: "2026-06-19",
+            title: "铜鉴湖",
+            thought: "这里的荷花盛景不亚于西湖\n只核心下了一场大雨\n把我们的出行计划终止\n幻宝还把我的伞弄坏了\n哼",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260619-2.jpg?raw=true"
+        },
+        {
+            date: "2026-06-26",
+            title: "川味泡菜馆",
+            thought: "幻宝每次吃辣都嘴硬\n结果再次被辣蒙\n晚上幻宝带我去看了萤火虫\n中途还偶遇了五步蛇\n真是奇妙的际遇",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260626.jpg?raw=true"
+        },
+        {
+            date: "2026-06-28",
+            title: "余杭塘河漫步",
+            thought: "你说我今天穿得很好看",
+            type: "image",
+            url: "https://github.com/SW-19/ImageBed/blob/main/20260628.jpg?raw=true"
+        },
+        {
+            date: "2026-07-20",
+            title: "200天纪念",
+            thought: "两百天啦！不知不觉我们已经一起走过了大半年。\n从冬天的秘密到夏天的萤火虫，希望接下来的每一个100天，都有你在身边。🧡",
+            type: "image",
+            url: "https://via.placeholder.com/400x300.png?text=200+Days" /* 这里记得换上你200天的图 */
+        }
+    ];
+
+    // 按时间由新到旧排序展示（最新的在最上面）
+    memories.sort((a,b) => new Date(a.date) - new Date(b.date));
+
+    const timeline = document.getElementById('timeline');
+    memories.forEach((item, index) => {
+        const days = getDaysCount(item.date);
+        const side = index % 2 === 0 ? 'left' : 'right';
+        
+        // 只有提供有效链接时才渲染图片或视频
+        const mediaTag = item.url && !item.url.includes('placeholder')
+            ? (item.type === 'video' ? `<video controls src="${item.url}"></video>` : `<img src="${item.url}" alt="memory">`)
+            : '';
+
+        const card = `
+            <div class="memory-card ${side}">
+                <div class="content">
+                    <h3>${item.date} · 第 ${days} 天</h3>
+                    <p><strong>${item.title}</strong></p>
+                    <p>${item.thought}</p>
+                    ${mediaTag}
+                </div>
+            </div>
+        `;
+        timeline.innerHTML += card;
+    });
+})();
+</script>
+
+</body>
+</html>
