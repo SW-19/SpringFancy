@@ -628,14 +628,7 @@
         },
 
     ];
-        <!-- 提交回忆的表单 -->
-<div class="input-card">
-    <h3>✨ 记录今天的甜蜜瞬间</h3>
-    <input type="text" id="inputTitle" placeholder="标题（例如：今天去吃了火锅）">
-    <textarea id="inputThought" placeholder="今天的感想..."></textarea>
-    <input type="file" id="inputFile" accept="image/*">
-    <button onclick="submitMemory()">发布回忆</button>
-</div>
+
     // 按时间由新到旧排序展示（最新的在最上面）
     memories.sort((a,b) => new Date(a.date) - new Date(b.date));
 
