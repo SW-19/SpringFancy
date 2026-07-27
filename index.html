@@ -630,7 +630,7 @@
     ];
 
     // 按时间由新到旧排序展示（最新的在最上面）
-    memories.sort((a,b) => new Date(a.date) - new Date(b.date));
+    memories.sort((a,b) => new Date(b.date) - new Date(a.date));
 
     const timeline = document.getElementById('timeline');
     memories.forEach((item, index) => {
