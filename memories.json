@@ -1,4 +1,4 @@
- [
+ 
         {
             date: "2026-01-01",
             title: "我们正式在一起啦",
@@ -335,4 +335,4 @@
             type: "image",
             url: "https://raw.githubusercontent.com/SW-19/ImageBed/refs/heads/main/IMG_7206.jpeg" 
         }
-    ]
+    
