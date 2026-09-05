@@ -468,7 +468,7 @@
     }
 
     // 页面加载时从 memories.json 获取数据并渲染
-    fetch('/memories.json?t=' + Date.now())
+    fetch('./memories.json?t=' + Date.now())
         .then(res => {
             if (!res.ok) throw new Error("未能读取到 memories.json");
             return res.json();
