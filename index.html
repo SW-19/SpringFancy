@@ -9,7 +9,7 @@
             --primary-color: #faccd1;
             --bg-color: #92ccf8;
             --text-color: #e9ecf1;
-            --card-bg: #CFEADC;
+            --card-bg: #FBEDCA;
         }
         body {
             font-family: 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
@@ -47,7 +47,7 @@
             gap: 15px;
             background: radial-gradient(circle at center, rgba(80, 243, 255, 0), transparent 100%);
         }
-        canvas {
+        canvas {                                   /* === 调爱心板 === */
             width: min(92vw, 700px);
             height: min(50vh, 700px);
             border-radius: 18px;
@@ -88,7 +88,7 @@
             top: 20px; right: 20px;
             z-index: 100;
         }
-        .settings-toggle {
+        .settings-toggle {                     /* === 调设置按钮 === */
             background: #FFDCA4;
             border: none;
             color: #CFEADC; width: 50px; height: 50px; border-radius: 50%;
@@ -122,7 +122,7 @@
             position: relative;
             padding: 20px;
         }
-        .timeline::after {
+        .timeline::after {             /* === 调中间的线 === */
             content: '';
             position: absolute;
             width: 2px;
@@ -138,8 +138,8 @@
             width: 50%;
             box-sizing: border-box;
         }
-        .memory-card::after {
-            content: '❤';
+        .memory-card::after {           /* === 调线上的爱心 === */
+            content: '❤'; 
             position: absolute;
             width: 22px; height: 22px;
             right: -11px; top: 20px;
@@ -153,10 +153,10 @@
         .right { left: 50%; text-align: left; }
         .right::after { left: -11px; }
 
-        .content {
+        .content {             /* === 调卡片 === */
             padding: 20px 15px;
             background: var(--card-bg);
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid #ee8c96;
             border-radius: 16px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
             transition: transform 0.3s, border-color 0.3s;
@@ -165,8 +165,8 @@
             transform: translateY(-4px); 
             border-color: rgba(255, 107, 107, 0.3);
         }
-        .content h3 { margin: 0 0 12px; color: var(--primary-color); font-size: 1.1rem; font-weight: 600; }
-        .content p { font-size: 0.95rem; line-height: 1.7; margin: 10px 0; white-space: pre-line; color: #d1d9e0; }
+        .content h3 { margin: 0 0 12px; color: #f77381; font-size: 1.1rem; font-weight: 600; }
+        .content p { font-size: 0.95rem; line-height: 1.7; margin: 10px 0; white-space: pre-line; color: #44aaf8; }
         .content img, .content video {
             width: 100%;
             border-radius: 12px;
